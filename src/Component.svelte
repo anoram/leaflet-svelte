@@ -10,20 +10,25 @@
 
   let {
     zoom = 13,
+    maxZoom = 19,
+    minZoom = 1,
     mapID = "map",
     attributionControl = true,
-    maxZoom = 19,
-    minZoom = 5,
     center = [0, 0],
     markers,
+    recenter = false,
+    scrollWheelZoom = true,
+    tileLayer = {
+      url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    },
     controls = {
       zoomControl: true,
-      position: "topright",
+      position: false,
       scale: false,
     },
   } = options;
-
-
 
   function initialise() {
     setTimeout(() => {
@@ -41,24 +46,38 @@
       minZoom,
       maxZoom,
     }).setView(center, zoom);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    L.tileLayer(tileLayer.url, {
+      attribution: tileLayer.attribution,
     }).addTo(map);
 
-    if (!controls.zoomControl) {
-      L.control
+    if (!scrollWheelZoom) {
+      map.scrollWheelZoom.disable();
+    }
+   
+    let controlElement = L.control;
+    if(!controls.zoomControl){
+      map.removeControl(map.zoomControl)
+    }
+    if (controls.scale) {
+      controlElement.scale({ position: controls.position }).addTo(map);
+    }
+    if (controls.zoomControl && controls.position) {
+      map.removeControl(map.zoomControl)
+      controlElement
         .zoom({
           position: controls.position,
         })
         .addTo(map);
+      
     }
 
-    if (controls.scale) {
-      L.control.scale({ position: controls.position }).addTo(map);
-    }
+  
+
+   
     let marker;
     let icon;
+    let markersArray = [];
+    let bounds;
     let defaultIcon = {
       iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
       iconRetinaUrl:
@@ -73,6 +92,7 @@
     };
     if (markers) {
       markers.map((e) => {
+        markersArray.push([e.lat, e.lng]);
         if (e.icon) {
           icon = L.icon(e.icon);
         } else {
@@ -93,6 +113,15 @@
         }
         marker.addTo(map);
       });
+      if (recenter) {
+        if (markersArray.length == 1) {
+          map.panTo(L.latLng(markersArray[0][0], markersArray[0][1]));
+          map.setZoom(zoom);
+        } else {
+          bounds = new L.LatLngBounds(markersArray);
+          map.fitBounds(bounds);
+        }
+      }
     }
   }
 
@@ -113,4 +142,4 @@
 <svelte:window on:resize={resizeMap} />
 
 <div class="map" id={mapID} bind:this={mapID} />
-<LoadSdk on:ready={initialise}/>
+<LoadSdk on:ready={initialise} />
