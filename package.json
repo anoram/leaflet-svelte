@@ -1,0 +1,33 @@
+{
+  "name": "@anoram/leaflet-svelte",
+  "svelte": "src/index.js",
+  "module": "dist/index.mjs",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "rollup -c",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^6.0.0",
+    "rollup": "^1.20.0",
+    "rollup-plugin-svelte": "^5.0.0",
+    "svelte": "^3.0.0"
+  },
+  "keywords": [
+    "svelte"
+  ],
+  "files": [
+    "src",
+    "dist"
+  ],
+  "dependencies": {
+    "@beyonk/async-script-loader": "^2.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "Svelte wrapper for Leaflet",
+  "version": "0.0.2",
+  "author": "Shriji Kondan (shriji@anoram.com)",
+  "license": "MIT"
+}
