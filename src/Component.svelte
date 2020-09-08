@@ -25,7 +25,7 @@
     },
     controls = {
       zoomControl: true,
-      position: false,
+      position: "topleft",
       scale: false,
     },
   } = options;
@@ -56,7 +56,7 @@
    
     let controlElement = L.control;
     if(!controls.zoomControl){
-      map.removeControl(map.zoomControl)
+      controlElement().remove()
     }
     if (controls.scale) {
       controlElement.scale({ position: controls.position }).addTo(map);

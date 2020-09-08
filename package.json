@@ -30,7 +30,7 @@
     "access": "public"
   },
   "description": "Svelte wrapper for Leaflet",
-  "version": "0.0.4-alpha",
+  "version": "0.0.4-alpha2",
   "author": "Shriji Kondan (shriji@anoram.com)",
   "license": "MIT"
 }
