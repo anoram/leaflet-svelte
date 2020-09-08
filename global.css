@@ -1,0 +1,22 @@
+
+pre{
+    height: auto;
+    max-height: 450px;
+	font-size: 12px !important;
+
+  }
+
+  .tag {
+        display: inherit !important;
+    border: inherit !important;
+    text-transform:inherit !important;
+    color: inherit !important;
+    padding: inherit !important;
+    line-height: inherit !important;
+    letter-spacing: inherit !important;
+  }
+
+  code, kbd, pre {
+    background-color: #2d2d2d !important;
+    color: #ccc !important;
+}
