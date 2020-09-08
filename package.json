@@ -30,7 +30,15 @@
     "access": "public"
   },
   "description": "Svelte wrapper for Leaflet",
-  "version": "0.0.4-alpha2",
+  "version": "0.0.5",
   "author": "Shriji Kondan (shriji@anoram.com)",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anoram/leaflet-svelte.git"
+  },
+  "bugs": {
+    "url": "https://github.com/anoram/leaflet-svelte/issues"
+  },
+  "homepage": "https://github.com/anoram/leaflet-svelte#readme"
 }
