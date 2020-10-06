@@ -19,11 +19,13 @@
     circles,
     recenter = false,
     scrollWheelZoom = true,
-    tileLayer = {
-      url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    },
+    tilelayers = [
+      {
+        url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      },
+    ],
     controls = {
       zoomControl: true,
       position: "topleft",
@@ -31,15 +33,90 @@
     },
   } = options;
 
+  let icon;
+  let markersArray = [];
+  let circleArray = [];
+  let bounds;
+  let defaultIcon = {
+    iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+    iconRetinaUrl:
+      "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+    shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    tooltipAnchor: [1, -34],
+    shadowSize: [41, 41],
+  };
+
   function initialise() {
     setTimeout(() => {
       L = window["L"];
 
       createMap();
+
       dispatch("ready");
     }, 1);
   }
+  function makePopup(marker, options) {
+    marker
+      .bindPopup(options.text, {
+        closeOnClick: false,
+        autoClose: false,
+        ...options,
+      })
+      .addTo(map);
+    if (options.isOpen) {
+      marker.openPopup();
+    }
+  }
+  function makeTooltip(marker, options) {
+    marker.bindTooltip(options.text, { ...options }).addTo(map);
+    if (options.isOpen) {
+      marker.openTooltip();
+    }
+  }
+  let m = [];
 
+  export const addMarker = (obj) => {
+    // console.log(obj);
+
+    obj.markers.map((e, i) => {
+      if (e.icon) {
+        // console.log(e.icon)
+        icon = L.icon(e.icon);
+      }
+
+      m[i] = new L.marker([e.lat, e.lng], { icon }).addTo(map);
+      if (e.popup) {
+        makePopup(m[i], e.popup);
+      }
+      if (e.tooltip) {
+        makeTooltip(m[i], e.tooltip);
+      }
+    });
+  };
+
+  let added = false;
+  export const updateMarkers = (obj) => {
+    if (!added) {
+      addMarker(obj);
+      added = true;
+    }
+
+    obj.markers.map((i, k) => {
+      // console.log(i);
+      m[k].setLatLng(i).update();
+      m[k].addTo(map);
+    });
+
+    // map.panTo(arr[0])
+    // console.log(m);
+  };
+
+  export const setZoom = (x = 5) => {
+    map.setZoom(x);
+  };
   function createMap() {
     map = L.map(mapID, {
       attributionControl,
@@ -47,9 +124,15 @@
       minZoom,
       maxZoom,
     }).setView(center, zoom);
-    L.tileLayer(tileLayer.url, {
-      attribution: tileLayer.attribution,
-    }).addTo(map);
+    m = L.marker([0, 0]);
+
+    if (tilelayers) {
+      tilelayers.map((e) => {
+        L.tileLayer(e.url, {
+          ...e,
+        }).addTo(map);
+      });
+    }
 
     if (!scrollWheelZoom) {
       map.scrollWheelZoom.disable();
@@ -71,23 +154,6 @@
         .addTo(map);
     }
 
-
-    let icon;
-    let markersArray = [];
-    let circleArray = [];
-    let bounds;
-    let defaultIcon = {
-      iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-      iconRetinaUrl:
-        "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-      shadowUrl:
-        "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      tooltipAnchor: [1, -34],
-      shadowSize: [41, 41],
-    };
     if (markers) {
       markers.map((e) => {
         markersArray.push([e.lat, e.lng]);
@@ -113,9 +179,7 @@
     if (circles) {
       circles.map((e) => {
         circleArray.push([e.lat, e.lng]);
-           let circle = new L.circle(
-          [e.lat, e.lng],{ ...e }
-        );
+        let circle = new L.circle([e.lat, e.lng], { ...e });
         if (e.popup) {
           makePopup(circle, e.popup);
         }
@@ -125,25 +189,7 @@
         circle.addTo(map);
       });
     }
-    function makeTooltip(marker, options) {
-      marker.bindTooltip(options.text, { ...options }).addTo(map);
-      if (options.isOpen) {
-        marker.openTooltip();
-      }
-    }
 
-    function makePopup(marker, options) {
-      marker
-        .bindPopup(options.text, {
-          closeOnClick: false,
-          autoClose: false,
-          ...options
-        })
-        .addTo(map);
-      if (options.isOpen) {
-        marker.openPopup();
-      }
-    }
     if (recenter) {
       if (markersArray.length == 1) {
         map.panTo(L.latLng(markersArray[0][0], markersArray[0][1]));
@@ -172,4 +218,5 @@
 <svelte:window on:resize={resizeMap} />
 
 <div class="map" id={mapID} bind:this={mapID} />
+
 <LoadSdk on:ready={initialise} />
