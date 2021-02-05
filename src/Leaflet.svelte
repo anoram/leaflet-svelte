@@ -79,11 +79,9 @@
   let m = [];
 
   export const addMarker = (obj) => {
-    // console.log(obj);
 
     obj.markers.map((e, i) => {
       if (e.icon) {
-        // console.log(e.icon)
         icon = L.icon(e.icon);
       }
 
@@ -98,6 +96,11 @@
   };
 
   let added = false;
+
+  export const getMap = () => {
+    return map;
+  };
+
   export const updateMarkers = (obj) => {
     if (!added) {
       addMarker(obj);
@@ -105,13 +108,10 @@
     }
 
     obj.markers.map((i, k) => {
-      // console.log(i);
       m[k].setLatLng(i).update();
       m[k].addTo(map);
     });
 
-    // map.panTo(arr[0])
-    // console.log(m);
   };
 
   export const setZoom = (x = 5) => {
@@ -199,6 +199,7 @@
         map.fitBounds(bounds);
       }
     }
+    return map;
   }
 
   function resizeMap() {
@@ -208,15 +209,15 @@
   }
 </script>
 
+<svelte:window on:resize={resizeMap} />
+
+<div class="map" id={mapID} bind:this={mapID} />
+
+<LoadSdk on:ready={initialise} />
+
 <style>
   .map {
     height: inherit;
     width: inherit;
   }
 </style>
-
-<svelte:window on:resize={resizeMap} />
-
-<div class="map" id={mapID} bind:this={mapID} />
-
-<LoadSdk on:ready={initialise} />
